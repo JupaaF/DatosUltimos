@@ -2,6 +2,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import torch
+from torch.utils.data import DataLoader, Dataset, Sampler
 
 if __package__:
     from .splitting import random_split
@@ -49,12 +51,10 @@ class Normalizer:
         return (normalization_features(data) - self.mean) / self.scale
 
 
-class CustomDataset:
+class CustomDataset(Dataset):
     """Recibe una partición y un normalizador ajustado solo con entrenamiento."""
 
     def __init__(self, data: pd.DataFrame, normalizer: Normalizer):
-        import torch
-
         self.columns = FEATURE_COLUMNS.copy()
         self.normalizer = normalizer
         self.orientations = data["orientation"].to_numpy(copy=True)
@@ -70,7 +70,7 @@ class CustomDataset:
         return self.data[idx], self.targets[idx]
 
 
-class BalancedOrientationSampler:
+class BalancedOrientationSampler(Sampler[int]):
     """Igual número por orientación en cada época, sin reemplazo.
 
     Usar solo con entrenamiento. La mayoría se submuestrea de nuevo en cada
@@ -107,8 +107,6 @@ class BalancedOrientationSampler:
 
 
 def main() -> None:
-    from torch.utils.data import DataLoader
-
     dataset_dir = Path(__file__).resolve().parents[1] / "dataset" / "processed"
     data = load_data(
         dataset_dir / "stable_packings_horizontal.csv",
