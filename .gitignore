@@ -2,3 +2,9 @@
 __pycache__/
 *.pyc
 .vscode/
+runs/
+results/
+
+presentation/media/
+presentation/slides/
+skills/

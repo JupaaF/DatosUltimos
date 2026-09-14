@@ -6,9 +6,9 @@ import torch
 from torch.utils.data import DataLoader, Dataset, Sampler
 
 if __package__:
-    from .splitting import random_split
+    from .splitting import mixed_series_split
 else:
-    from splitting import random_split
+    from splitting import mixed_series_split
 
 
 FEATURE_COLUMNS = [
@@ -112,7 +112,7 @@ def main() -> None:
         dataset_dir / "stable_packings_horizontal.csv",
         dataset_dir / "stable_packings_vertical.csv",
     )
-    split = random_split(data)
+    split = mixed_series_split(data)
     normalizer = Normalizer(split.train)
     for name, partition in (("train", split.train), ("validation", split.validation), ("test", split.test)):
         dataset = CustomDataset(partition, normalizer)

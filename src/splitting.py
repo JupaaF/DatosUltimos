@@ -63,3 +63,50 @@ def horizontal_series_split(
     if train.empty or validation.empty or test.empty:
         raise ValueError("Las tres particiones deben contener datos")
     return DataSplit(train, validation, test)
+
+
+def mixed_series_split(data: pd.DataFrame, seed: int = 42) -> DataSplit:
+    """Reserva al azar dos series horizontales y una vertical.
+
+    Una horizontal completa va a validación y la otra a test. La vertical
+    se reparte aleatoriamente entre ambos, sin compartir filas: la mitad
+    (redondeada hacia abajo) va a validación y el resto a test. Todas las
+    demás series van a entrenamiento. La semilla reproduce la selección
+    y el reparto para los mismos datos y orden de filas.
+
+    Los índices y metadatos originales se conservan. Validación y test
+    comparten una serie vertical, aunque sus muestras son distintas.
+    """
+    if data["series_id"].isna().any():
+        raise ValueError("Todas las filas requieren series_id")
+    if not data["orientation"].isin(["horizontal", "vertical"]).all():
+        raise ValueError("Orientaciones desconocidas")
+    horizontal = data["orientation"].eq("horizontal").to_numpy()
+    vertical = data["orientation"].eq("vertical").to_numpy()
+    horizontal_series = sorted(data.loc[horizontal, "series_id"].unique())
+    vertical_series = sorted(data.loc[vertical, "series_id"].unique())
+    if len(horizontal_series) < 2 or not vertical_series:
+        raise ValueError("Se requieren al menos dos series horizontales y una vertical")
+    vertical_counts = data.loc[vertical].groupby("series_id").size()
+    if (vertical_counts < 2).any():
+        raise ValueError("Cada serie vertical debe tener al menos dos filas para poder dividirla")
+
+    rng = np.random.default_rng(seed)
+    validation_series, test_series = rng.choice(horizontal_series, size=2, replace=False)
+    shared_series = rng.choice(vertical_series)
+    validation_mask = horizontal & data["series_id"].eq(validation_series).to_numpy()
+    test_mask = horizontal & data["series_id"].eq(test_series).to_numpy()
+    shared_indices = rng.permutation(np.flatnonzero(
+        vertical & data["series_id"].eq(shared_series).to_numpy()
+    ))
+    midpoint = len(shared_indices) // 2
+    validation_mask[shared_indices[:midpoint]] = True
+    test_mask[shared_indices[midpoint:]] = True
+    train = data.iloc[np.flatnonzero(~(validation_mask | test_mask))].copy()
+    if train.empty:
+        raise ValueError("Deben quedar series para entrenamiento")
+    return DataSplit(
+        train,
+        data.iloc[np.flatnonzero(validation_mask)].copy(),
+        data.iloc[np.flatnonzero(test_mask)].copy(),
+    )

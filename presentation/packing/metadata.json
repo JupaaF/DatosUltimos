@@ -1,0 +1,35 @@
+{
+  "particles": 500,
+  "fps": 60,
+  "animation_seconds": 5,
+  "physical_seconds": 65,
+  "seed": 42,
+  "units": "m, kg, s",
+  "time_step": 0.0002777777777777778,
+  "stiffness": 50000.0,
+  "normal_damping": 140.0,
+  "friction": 0.1,
+  "tangential_damping": 80.0,
+  "mass_formula": "(radius / 0.2)**3 kg",
+  "box_size": [
+    3.4,
+    3.4,
+    2.4955793844071765
+  ],
+  "initial_box_size": [
+    3.4,
+    3.4,
+    3.2
+  ],
+  "target_density": 0.585,
+  "compression_density": 0.59,
+  "max_pair_overlap_m": null,
+  "resumed_from_seconds": 55,
+  "final_max_speed_m_s": 0.018605832235603758,
+  "final_max_lid_overlap_m": 0.00786262679130978,
+  "final_max_pair_overlap_m": 0.008269951594606861,
+  "solid_volume_fraction": 0.585,
+  "final_bed_height_m": 2.5034420111984863,
+  "model": "DEM translacional; sin rotaci\u00f3n ni historia de fricci\u00f3n est\u00e1tica. Ilustrativo.",
+  "lid": "Cierre 26\u201328 s; compresi\u00f3n 28\u201342 s; alivio 55\u201360 s; reposo hasta 65 s. Paredes telesc\u00f3picas."
+}
