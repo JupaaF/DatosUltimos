@@ -1,0 +1,52 @@
+{
+  "selection_metric": "out_of_fold.K_rmse",
+  "out_of_fold": {
+    "n": 298,
+    "target_mse": 0.0002099724369335973,
+    "K_rmse": 9.130182167445673e-05,
+    "K_mae": 5.4425650184737594e-05,
+    "K_r2": 0.9994506459514814
+  },
+  "folds": [
+    {
+      "fold": 0,
+      "seed": 42,
+      "best_epoch": 710,
+      "epochs_run": 1710,
+      "validation_series": [
+        "horizontal_2",
+        "horizontal_4",
+        "horizontal_7",
+        "vertical_1"
+      ],
+      "metrics": {
+        "n": 127,
+        "target_mse": 0.0003605437275827892,
+        "K_rmse": 9.753058788870584e-05,
+        "K_mae": 5.312779336307064e-05,
+        "K_r2": 0.999252900536719
+      }
+    },
+    {
+      "fold": 1,
+      "seed": 43,
+      "best_epoch": 3185,
+      "epochs_run": 4185,
+      "validation_series": [
+        "horizontal_1",
+        "horizontal_3",
+        "horizontal_5",
+        "vertical_3"
+      ],
+      "metrics": {
+        "n": 171,
+        "target_mse": 9.814463627601037e-05,
+        "K_rmse": 8.63856228952391e-05,
+        "K_mae": 5.538955554351949e-05,
+        "K_r2": 0.9991224301160527
+      }
+    }
+  ],
+  "suggested_final_epochs": 1948,
+  "test_evaluated": false
+}

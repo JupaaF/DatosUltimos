@@ -1,0 +1,532 @@
+{
+  "ranking": "/home/jpfernandez/Documentos/DatosUltimos/runs/conditional_log_power_law_grouped_cv_hybrid_ensemble_20260914/cv_ranking.csv",
+  "selected_models": [
+    {
+      "combination": "12_density+MCN",
+      "features": "density,MCN",
+      "cv_K_rmse": 5.208823112535381e-05,
+      "cv_K_mae": 3.1405863301689354e-05,
+      "cv_K_r2": 0.9998211978804472,
+      "final_epochs": 320
+    },
+    {
+      "combination": "03_MCN",
+      "features": "MCN",
+      "cv_K_rmse": 5.239925685843084e-05,
+      "cv_K_mae": 3.4073102208273695e-05,
+      "cv_K_r2": 0.9998190562030436,
+      "final_epochs": 1183
+    },
+    {
+      "combination": "33_density+MCN+q_over_p",
+      "features": "density,MCN,q_over_p",
+      "cv_K_rmse": 5.4381444889032704e-05,
+      "cv_K_mae": 3.61515768357866e-05,
+      "cv_K_r2": 0.9998051075887964,
+      "final_epochs": 418
+    },
+    {
+      "combination": "16_MCN+q",
+      "features": "MCN,q",
+      "cv_K_rmse": 5.945576983905894e-05,
+      "cv_K_mae": 3.683165719323462e-05,
+      "cv_K_r2": 0.999767039946453,
+      "final_epochs": 1722
+    },
+    {
+      "combination": "17_MCN+q_over_p",
+      "features": "MCN,q_over_p",
+      "cv_K_rmse": 6.010254036528326e-05,
+      "cv_K_mae": 3.8865211528616266e-05,
+      "cv_K_r2": 0.9997619440166988,
+      "final_epochs": 1404
+    }
+  ],
+  "hyperparameter_count": 48,
+  "total_cv_candidates": 240,
+  "grid": [
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        16,
+        8
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        32,
+        16
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.0003,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.0,
+      "physical_loss_weight": 1.0
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 0.25
+    },
+    {
+      "hidden_sizes": [
+        64,
+        32
+      ],
+      "learning_rate": 0.001,
+      "batch_size": 32,
+      "dropout": 0.1,
+      "physical_loss_weight": 1.0
+    }
+  ],
+  "epochs": 10000,
+  "patience": 1000,
+  "split_seed": 42
+}

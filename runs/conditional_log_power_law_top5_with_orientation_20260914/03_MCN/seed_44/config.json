@@ -1,0 +1,25 @@
+{
+  "mode": "final",
+  "features": [
+    "MCN",
+    "orientation"
+  ],
+  "output_dir": "runs/conditional_log_power_law_top5_with_orientation_20260914/03_MCN/seed_44",
+  "data_dir": "/home/jpfernandez/Documentos/DatosUltimos/dataset/processed",
+  "folds": 2,
+  "final_epochs": 2005,
+  "epochs": 10000,
+  "patience": 1000,
+  "learning_rate": 0.001,
+  "physical_loss_weight": 1.0,
+  "batch_size": 32,
+  "dropout": 0.1,
+  "hidden_sizes": [
+    32,
+    16
+  ],
+  "seed": 44,
+  "split_seed": 42,
+  "device": "cpu",
+  "log_every": 1000
+}

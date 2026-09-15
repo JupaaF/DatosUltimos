@@ -1,0 +1,21 @@
+{
+  "mode": "final",
+  "features": [
+    "MCN",
+    "q_over_p"
+  ],
+  "output_dir": "runs/conditional_log_power_law_grouped_cv_hybrid_ensemble_20260914/final_top10_five_seeds/17_MCN+q_over_p/seed_45",
+  "data_dir": "/home/jpfernandez/Documentos/DatosUltimos/dataset/processed",
+  "folds": 2,
+  "final_epochs": 1404,
+  "epochs": 10000,
+  "patience": 1000,
+  "learning_rate": 0.001,
+  "physical_loss_weight": 1.0,
+  "batch_size": 16,
+  "dropout": 0.1,
+  "seed": 45,
+  "split_seed": 42,
+  "device": "cpu",
+  "log_every": 1000
+}

@@ -1,0 +1,22 @@
+{
+  "model": "log-power-law",
+  "features": [
+    "q",
+    "q_over_p",
+    "a"
+  ],
+  "log_columns": null,
+  "data_dir": "/home/jpfernandez/Documentos/DatosUltimos/dataset/processed",
+  "output_dir": "/home/jpfernandez/Documentos/DatosUltimos/runs/log_power_law_all_combinations_e10000_p1000_20260914/56_q+q_over_p+a",
+  "epochs": 10000,
+  "batch_size": 16,
+  "learning_rate": 0.001,
+  "patience": 1000,
+  "min_delta": 0.0,
+  "dropout": 0.1,
+  "seed": 42,
+  "split_seed": 42,
+  "device": "cpu",
+  "log_every": 1000,
+  "no_balance": false
+}

@@ -13,6 +13,8 @@ modelo y `data.py` construye los loaders compartidos.
 En ambos datasets,
 `features` se estandariza. Por defecto, si incluye `trace_sigma`, se aplica
 primero su logaritmo natural. Se puede configurar con `log_columns`.
+`orientation` también puede usarse como entrada y se codifica como
+`horizontal=0`, `vertical=1` antes del ajuste del normalizador.
 La rama física `log_p` y el objetivo `log_K` nunca se estandarizan.
 En estos CSV, `K` corresponde a `trace_K = tr(K)/3`.
 
@@ -50,8 +52,7 @@ explícitamente; no incluir el objetivo entre los predictores.
 
 El normalizador devuelto conserva columnas, transformaciones, media y
 escala; debe guardarse junto al modelo para reutilizarlo en inferencia.
-`train.py` guarda estos datos en `best_model.pt`. `predict.py` todavía no
-implementa un comando de inferencia.
+`train.py` guarda estos datos en `best_model.pt`.
 
 Verificación: `.venv/bin/python -m unittest discover -s tests`.
 
@@ -65,11 +66,17 @@ Los módulos usan imports de paquete; ejecutar el ejemplo con
 .venv/bin/python -m src.train --model log-power-law \
   --features density MCN q_over_p a --epochs 1000 --patience 100
 
+.venv/bin/python -m src.train --model log-power-law \
+  --features density MCN q_over_p a --scale-target
+
 .venv/bin/python -m src.train --model mlp \
   --features density MCN trace_sigma q_over_p a
+
+.venv/bin/python -m src.train --model rbf_4 \
+  --features trace_sigma density MCN
 ```
 
-La selección de entradas es obligatoria. Ambos modelos usan Adam; la pérdida
+La selección de entradas es obligatoria. Los modelos neuronales usan Adam; la pérdida
 es MSE sobre K físico para `mlp` y sobre log natural de K para `log-power-law`.
 Estas pérdidas no son directamente comparables entre modelos. Las métricas
 finales incluyen RMSE, MAE y R² en unidades físicas de K.
@@ -78,6 +85,12 @@ La mejor época se selecciona por el mínimo MSE de validación, se restauran
 sus pesos y después se evalúa test. `--patience` controla la parada temprana;
 `--min-delta` fija la mejora mínima que reinicia la paciencia. El mínimo real
 se guarda aunque la mejora sea inferior a ese umbral.
+
+`rbf_4` y `rbf_5` son interpoladores RBF de SciPy: se ajustan una sola vez
+sobre todas las filas de train normalizadas y sobre `ln(K)`, por lo que no
+utilizan épocas, batches, optimizador ni parada temprana. Se guardan en
+`best_model.pkl`; validación y test conservan el mismo split por series que
+los modelos neuronales.
 
 `--split-seed` (42 por defecto) fija las particiones por series independientemente
 de `--seed`, que controla inicialización y muestreo. Mantener la partición
@@ -88,7 +101,8 @@ La reproducibilidad numérica depende también del dispositivo y entorno.
 Cada ejecución crea un directorio nuevo en `runs/`, o el indicado mediante
 `--output-dir`, y guarda:
 
-- `best_model.pt`: pesos, arquitectura, normalización y transformación del objetivo.
+- `best_model.pt` (red neuronal) o `best_model.pkl` (RBF): modelo, normalización
+  y transformación del objetivo.
 - `config.json`: argumentos de la ejecución.
 - `partitions.csv`: datos físicos con partición e identificador de fila.
 - `history.csv`: pérdidas por época (train en modo entrenamiento, con dropout).
@@ -98,3 +112,22 @@ Cada ejecución crea un directorio nuevo en `runs/`, o el indicado mediante
 No se sobrescriben directorios existentes. El checkpoint es para inferencia;
 no incluye el estado del optimizador para reanudar entrenamiento.
 Consultar todas las opciones con `.venv/bin/python -m src.train --help`.
+
+## Comparación de predicciones
+
+`predict.py` acepta una lista de directorios de entrenamiento (o rutas a sus
+`best_model.pt`), reconstruye cada modelo y predice las series horizontal y
+vertical de test guardadas en `partitions.csv`:
+
+```bash
+.venv/bin/python -m src.predict \
+  --models runs/estudio/modelo_1 runs/estudio/modelo_2 \
+  --labels modelo_1 modelo_2
+```
+
+Los modelos deben compartir exactamente la misma partición de test. El comando
+genera `test_K_comparison.png`, respetando el orden de las muestras y usando
+escala logarítmica para K, y `test_predictions.csv`, que reúne los valores
+reales y predichos (incluida `trace_sigma`). También crea `test_K_error.png`
+con el error firmado y `test_K_relative_error.png` con el error relativo
+absoluto porcentual.

@@ -13,6 +13,45 @@ class DataSplit:
     test: pd.DataFrame
 
 
+def grouped_series_test_split(data: pd.DataFrame, seed: int = 42):
+    """Reserva una serie completa de cada orientación como test final.
+
+    La secuencia aleatoria conserva con seed 42 las series de test elegidas por
+    ``mixed_series_split``: horizontal_6 y vertical_2 para los datos actuales.
+    """
+    horizontal_series = sorted(data.loc[data.orientation.eq("horizontal"), "series_id"].unique())
+    vertical_series = sorted(data.loc[data.orientation.eq("vertical"), "series_id"].unique())
+    if len(horizontal_series) < 3 or len(vertical_series) < 3:
+        raise ValueError("Se requieren al menos tres series de cada orientación")
+    rng = np.random.default_rng(seed)
+    _, test_horizontal = rng.choice(horizontal_series, size=2, replace=False)
+    test_vertical = rng.choice(vertical_series)
+    test_mask = data.series_id.isin([test_horizontal, test_vertical])
+    return data.loc[~test_mask].copy(), data.loc[test_mask].copy()
+
+
+def grouped_series_folds(development: pd.DataFrame, n_splits: int = 2, seed: int = 42):
+    """Crea folds sin compartir ``series_id`` y balanceados por orientación."""
+    if n_splits < 2:
+        raise ValueError("n_splits debe ser al menos 2")
+    rng = np.random.default_rng(seed)
+    fold_groups = [set() for _ in range(n_splits)]
+    for orientation in ("horizontal", "vertical"):
+        groups = development.loc[development.orientation.eq(orientation), "series_id"].unique()
+        if len(groups) < n_splits:
+            raise ValueError(f"No hay suficientes series {orientation} para {n_splits} folds")
+        groups = rng.permutation(groups)
+        for index, group in enumerate(groups):
+            fold_groups[index % n_splits].add(group)
+    folds = []
+    for groups in fold_groups:
+        validation_mask = development.series_id.isin(groups)
+        train = development.loc[~validation_mask].copy()
+        validation = development.loc[validation_mask].copy()
+        folds.append(DataSplit(train, validation, validation.copy()))
+    return folds
+
+
 def random_split(data: pd.DataFrame, seed: int = 42) -> DataSplit:
     """70/15/15 por filas; puede repartir una misma serie entre particiones."""
     if len(data) < 7:

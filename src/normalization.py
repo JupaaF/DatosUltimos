@@ -6,6 +6,7 @@ import pandas as pd
 
 LOG_COLUMNS = ["trace_sigma"]
 TARGET_COLUMN = "trace_K"  # El CSV contiene tr(K)/3.
+ORIENTATION_VALUES = {"horizontal": 0.0, "vertical": 1.0}
 
 
 def normalization_features(
@@ -20,7 +21,14 @@ def normalization_features(
         raise ValueError("Las entradas deben ser una lista no vacía de columnas únicas")
     if not set(logs).issubset(columns):
         raise ValueError("Las columnas logarítmicas deben formar parte de las entradas")
-    result = data[columns].astype(np.float64).copy()
+    result = data[columns].copy()
+    if "orientation" in columns:
+        encoded = result["orientation"].map(ORIENTATION_VALUES)
+        if encoded.isna().any():
+            unknown = sorted(result.loc[encoded.isna(), "orientation"].astype(str).unique())
+            raise ValueError(f"Orientaciones desconocidas: {unknown}")
+        result["orientation"] = encoded
+    result = result.astype(np.float64)
     if not np.isfinite(result.to_numpy()).all():
         raise ValueError("La normalización requiere valores finitos y sin ausentes")
     if (result[logs] <= 0).any().any():
@@ -46,4 +54,3 @@ class Normalizer:
     def transform(self, data: pd.DataFrame) -> pd.DataFrame:
         features = normalization_features(data, self.columns, self.log_columns)
         return (features - self.mean) / self.scale
-
