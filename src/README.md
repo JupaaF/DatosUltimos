@@ -131,3 +131,65 @@ escala logarítmica para K, y `test_predictions.csv`, que reúne los valores
 reales y predichos (incluida `trace_sigma`). También crea `test_K_error.png`
 con el error firmado y `test_K_relative_error.png` con el error relativo
 absoluto porcentual.
+
+
+## Suite con todos los archivos raw
+
+`python -m src.preprocessing` genera los tres CSV procesados. Conserva las
+200 filas horizontales y las 209 cíclicas; selecciona 200 de las 596 verticales.
+El cupo vertical se reparte de forma casi uniforme entre las nueve series,
+conservando completas las series que tienen menos filas. Dentro de cada serie
+se buscan los puntos más próximos a densidades equiespaciadas entre sus extremos.
+
+`run_model_suite.py` evalúa las 63 combinaciones de las seis entradas para
+`rbf_4`, `rbf_5` y `log-power-law`. Por defecto usa `full-grouped`: reserva
+series completas de horizontal y vertical para validación y prueba, y las dos
+series cíclicas para prueba. El normalizador se ajusta solo con entrenamiento;
+la red usa todas sus filas en cada época. `summary.csv` ordena todas las
+configuraciones por RMSE físico de K en validación y `winner.json` señala la
+mejor. Las métricas de prueba no intervienen en la selección.
+
+```bash
+.venv/bin/python -m src.preprocessing
+.venv/bin/python -m src.run_model_suite \
+  --models rbf_4 rbf_5 log-power-law \
+  --output-dir runs/density_balanced_grouped_20260928 \
+  --workers 8 --epochs 3000 --patience 300 --split-seed 42
+```
+
+## Validación cruzada de las mejores configuraciones
+
+`run_top10_cv.py` toma las diez combinaciones con menor RMSE físico de
+validación de cada arquitectura en una suite ya terminada. Sobre sus filas de
+desarrollo hace cinco pliegues por `series_id`; cada serie completa aparece en
+un único pliegue de validación y el normalizador se ajusta solo con las filas
+de entrenamiento de ese pliegue. Conserva fuera de la validación cruzada el
+test original, incluidas las dos series cíclicas.
+
+```bash
+.venv/bin/python -m src.run_top10_cv \
+  --source-run runs/density_balanced_grouped_20260928 \
+  --output-dir runs/top10_grouped_cv_20260928 \
+  --folds 5 --top 10 --workers 8 --seed 42 \
+  --epochs 3000 --patience 300
+```
+
+`cv_summary.csv` ordena las 30 configuraciones por RMSE físico sobre todas las
+predicciones fuera de muestra. Cada configuración guarda la asignación de
+series a pliegues, las predicciones y las métricas de cada pliegue. Como las
+diez combinaciones por arquitectura se preseleccionaron con la validación
+anterior, la comparación CV aún puede tener sesgo de selección; el test
+reservado sigue intacto para una evaluación final independiente.
+
+## Visor interactivo de predicciones zigzag
+
+`build_predict_viewer.py` lee las cinco predicciones zigzag de cada arquitectura
+creadas con `predict.py` y genera `results_zigzag_predict_viewer.html`. El HTML
+incluye los datos y funciona sin servidor ni conexión. Permite mostrar u ocultar
+individualmente las quince redes y K real, seleccionar grupos completos, cambiar
+el eje horizontal, ampliar y desplazar ambos ejes. Las pestañas muestran K,
+el error absoluto y el error relativo absoluto porcentual.
+
+```bash
+.venv/bin/python -m src.build_predict_viewer
+```

@@ -1,0 +1,11 @@
+{
+  "model": "log-power-law",
+  "combination": "34_density+MCN+a",
+  "features": "density,MCN,a",
+  "previous_validation_K_rmse": 2.5395518587620237e-05,
+  "cv_oof_K_rmse": 5.7704970741373856e-05,
+  "cv_oof_K_mae": 3.622986492510359e-05,
+  "cv_oof_K_r2": 0.9998329212652288,
+  "cv_fold_rmse_mean": 5.301227249466752e-05,
+  "cv_fold_rmse_std": 1.9590562365749248e-05
+}

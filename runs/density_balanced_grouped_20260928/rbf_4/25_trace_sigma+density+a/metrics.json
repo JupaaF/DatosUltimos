@@ -1,0 +1,33 @@
+{
+  "best_epoch": null,
+  "epochs_run": 0,
+  "target_transform": "log",
+  "fit": "scipy_rbf_single_fit",
+  "model_description": {
+    "name": "rbf_4",
+    "kernel": "cubic",
+    "degree": 1,
+    "smoothing": 1e-08,
+    "neighbors": 40,
+    "effective_neighbors": 40,
+    "scale_features": false,
+    "x_min": null,
+    "x_scale": null
+  },
+  "validation": {
+    "n": 45,
+    "target_mse": 0.0015274681503952433,
+    "K_rmse": 0.0002492286148348563,
+    "K_mae": 0.00013030168764601452,
+    "K_r2": 0.9938318204199917,
+    "physical_metrics_finite": true
+  },
+  "test": {
+    "n": 254,
+    "target_mse": 0.0016041336746571526,
+    "K_rmse": 0.00032603269412428667,
+    "K_mae": 0.0002183676235963392,
+    "K_r2": 0.9933956982791067,
+    "physical_metrics_finite": true
+  }
+}

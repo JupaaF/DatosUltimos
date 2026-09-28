@@ -1,0 +1,10 @@
+{
+  "source_run": "/home/jpfernandez/Documentos/DatosUltimos/runs/density_balanced_grouped_20260928",
+  "folds": 5,
+  "top_per_model": 10,
+  "seed": 42,
+  "epochs": 3000,
+  "patience": 300,
+  "selection": "top by previous validation K RMSE within each architecture",
+  "test_evaluated": false
+}

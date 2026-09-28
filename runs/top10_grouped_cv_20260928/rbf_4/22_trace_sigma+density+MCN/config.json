@@ -1,0 +1,15 @@
+{
+  "source_run": "/home/jpfernandez/Documentos/DatosUltimos/runs/density_balanced_grouped_20260928",
+  "model": "rbf_4",
+  "combination": "22_trace_sigma+density+MCN",
+  "features": [
+    "trace_sigma",
+    "density",
+    "MCN"
+  ],
+  "folds": 5,
+  "seed": 42,
+  "epochs": 3000,
+  "patience": 300,
+  "held_out_test_rows": 254
+}

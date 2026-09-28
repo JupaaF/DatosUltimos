@@ -12,12 +12,12 @@ from . import normalization
 from .datasets import ModelDataset, MLPDataset, LogPowerLawDataset
 
 
-def load_data(filename_horizontal: Path, filename_vertical: Path) -> pd.DataFrame:
+def load_data(filename_horizontal: Path, filename_vertical: Path, filename_cyclic: Path | None = None) -> pd.DataFrame:
     """Carga los valores físicos para dividirlos antes de normalizar."""
-    return pd.concat(
-        [pd.read_csv(filename_horizontal), pd.read_csv(filename_vertical)],
-        ignore_index=True,
-    )
+    paths = [filename_horizontal, filename_vertical]
+    if filename_cyclic is not None:
+        paths.append(filename_cyclic)
+    return pd.concat([pd.read_csv(path) for path in paths], ignore_index=True)
 
 
 class BalancedOrientationSampler(Sampler[int]):

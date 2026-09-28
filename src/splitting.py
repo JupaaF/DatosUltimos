@@ -104,6 +104,35 @@ def horizontal_series_split(
     return DataSplit(train, validation, test)
 
 
+def full_grouped_split(data: pd.DataFrame, seed: int = 42) -> DataSplit:
+    """Separa series completas y reserva las dos cíclicas para test."""
+    required = {"horizontal", "vertical", "cyclic"}
+    if set(data["orientation"].unique()) != required:
+        raise ValueError(f"Se requieren las orientaciones {sorted(required)}")
+    if data["series_id"].isna().any():
+        raise ValueError("Todas las filas requieren series_id")
+    rng = np.random.default_rng(seed)
+    validation_series = set()
+    test_series = set(data.loc[data.orientation.eq("cyclic"), "series_id"])
+    if len(test_series) != 2:
+        raise ValueError("Se esperan exactamente dos series cíclicas")
+    for orientation in ("horizontal", "vertical"):
+        counts = data.loc[data.orientation.eq(orientation)].groupby("series_id").size()
+        if len(counts) < 3:
+            raise ValueError(f"Se requieren al menos tres series {orientation}")
+        target_size = 0.15 * counts.sum()
+        candidates = sorted(
+            counts.index, key=lambda series: (abs(counts[series] - target_size), series)
+        )[:2]
+        chosen = rng.permutation(candidates)
+        validation_series.add(chosen[0])
+        test_series.add(chosen[1])
+    validation = data.loc[data.series_id.isin(validation_series)].copy()
+    test = data.loc[data.series_id.isin(test_series)].copy()
+    train = data.loc[~data.series_id.isin(validation_series | test_series)].copy()
+    return DataSplit(train, validation, test)
+
+
 def mixed_series_split(data: pd.DataFrame, seed: int = 42) -> DataSplit:
     """Mezcla todo el corpus y aplica un reparto aleatorio 70/15/15 por filas."""
     if data["series_id"].isna().any():

@@ -202,10 +202,10 @@ def plot_predictions(predictions: pd.DataFrame, output: Path) -> Path:
     for axis, ((orientation, series_id), group) in zip(axes.flat, series):
         truth = group.drop_duplicates("row_id").sort_values("row_id")
         sample = np.arange(1, len(truth) + 1)
-        axis.plot(sample, truth["K_true"], "o-", color="black", label="K real")
+        axis.plot(sample, truth["K_true"], "-", color="black", linewidth=1.4, label="K real")
         for model, model_data in group.groupby("model", sort=False):
             model_data = model_data.sort_values("row_id")
-            axis.plot(sample, model_data["K_predicted"], "o--", markersize=3, label=model)
+            axis.plot(sample, model_data["K_predicted"], "--", linewidth=1.0, label=model)
         axis.set_yscale("log")
         axis.set_title(f"{orientation.capitalize()} — {series_id}")
         axis.set_xlabel("Muestra de la serie de test")
@@ -232,7 +232,7 @@ def plot_errors(predictions: pd.DataFrame, output: Path, *, relative: bool = Fal
             if relative:
                 error = 100.0 * error.abs() / model_data["K_true"].abs()
             sample = np.arange(1, len(model_data) + 1)
-            axis.plot(sample, error, "o-", markersize=3, label=model)
+            axis.plot(sample, error, "-", linewidth=1.0, label=model)
         if not relative:
             axis.axhline(0.0, color="black", linewidth=1, alpha=0.7)
         axis.set_title(f"{orientation.capitalize()} — {series_id}")

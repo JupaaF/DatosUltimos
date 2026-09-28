@@ -1,0 +1,16 @@
+architecture,rank_cv,combination,features,cv_oof_K_rmse,zigzag_K_rmse,zigzag_K_mae
+log-power-law,1,34_density+MCN+a,"density,MCN,a",5.7704970741373856e-05,5.409453490426352e-05,4.336793593126462e-05
+log-power-law,2,54_density+MCN+q_over_p+a,"density,MCN,q_over_p,a",6.11770390972863e-05,3.009940552324323e-05,2.5563732403843904e-05
+log-power-law,3,33_density+MCN+q_over_p,"density,MCN,q_over_p",6.31109571381972e-05,3.54826277302234e-05,2.6624349246209797e-05
+log-power-law,4,12_density+MCN,"density,MCN",6.39569864959402e-05,3.809922824739359e-05,2.319580132017931e-05
+log-power-law,5,40_MCN+q_over_p+a,"MCN,q_over_p,a",7.813183430232348e-05,7.466899933361933e-05,5.933891741910242e-05
+rbf_4,1,44_trace_sigma+density+MCN+a,"trace_sigma,density,MCN,a",7.437953328312206e-05,3.3062040740168254e-05,2.5576335123421943e-05
+rbf_4,2,59_trace_sigma+density+MCN+q_over_p+a,"trace_sigma,density,MCN,q_over_p,a",7.941618349623066e-05,3.322605524223528e-05,2.5552264268134152e-05
+rbf_4,3,58_trace_sigma+density+MCN+q+a,"trace_sigma,density,MCN,q,a",0.0001165349549955,3.575574359691867e-05,2.8341911168619507e-05
+rbf_4,4,22_trace_sigma+density+MCN,"trace_sigma,density,MCN",0.0001624027975015,0.0001394146152813,0.0001069582829349
+rbf_4,5,50_trace_sigma+MCN+q_over_p+a,"trace_sigma,MCN,q_over_p,a",0.0001813207149531,7.79536860863441e-05,5.4613147318686594e-05
+rbf_5,1,44_trace_sigma+density+MCN+a,"trace_sigma,density,MCN,a",0.0001776921071244,4.003046818066423e-05,3.1296737486181715e-05
+rbf_5,2,22_trace_sigma+density+MCN,"trace_sigma,density,MCN",0.0005833723165434,0.0004791701462165,0.0003220196882389
+rbf_5,3,49_trace_sigma+MCN+q+a,"trace_sigma,MCN,q,a",0.0007816477219167,0.0001191661664279,8.432194701388659e-05
+rbf_5,4,43_trace_sigma+density+MCN+q_over_p,"trace_sigma,density,MCN,q_over_p",0.0013810689776571,0.000409337535051,0.0002769107281891
+rbf_5,5,28_trace_sigma+MCN+a,"trace_sigma,MCN,a",0.0015127684597563,0.0002646392348615,0.0001521453574

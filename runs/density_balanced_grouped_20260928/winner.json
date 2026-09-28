@@ -1,0 +1,13 @@
+{
+  "model": "log-power-law",
+  "combination": "54_density+MCN+q_over_p+a",
+  "features": "density,MCN,q_over_p,a",
+  "validation_K_rmse": 1.8134547131305627e-05,
+  "validation_K_mae": 1.4861795866709035e-05,
+  "validation_K_r2": 0.9999673431236459,
+  "test_K_rmse": 0.0002093880154326995,
+  "test_K_mae": 0.0001583728524750422,
+  "test_K_r2": 0.997275993003389,
+  "best_epoch": 2176.0,
+  "epochs_run": 2476
+}

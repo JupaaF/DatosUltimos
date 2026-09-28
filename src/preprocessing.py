@@ -4,32 +4,32 @@ import numpy as np
 import pandas as pd
 
 DATASET_DIR = Path(__file__).resolve().parents[1] / "dataset"
-VERTICAL_SAMPLES_PER_SERIES = 15
-
-
-def series_numbers(data: pd.DataFrame) -> pd.Series:
-    """Numera las series según los reinicios de checkpoint."""
-    return data["checkpoint"].diff().le(0).cumsum() + 1
-
-
-def representative_vertical_rows(
-    data: pd.DataFrame,
-    series: pd.Series,
-    samples_per_series: int = VERTICAL_SAMPLES_PER_SERIES,
-) -> tuple[pd.DataFrame, pd.Series]:
-    """Selecciona posiciones equiespaciadas o todas si la serie es corta."""
+def balanced_vertical_rows(data: pd.DataFrame, target_rows: int) -> pd.DataFrame:
+    """Selecciona densidades equiespaciadas por serie hasta igualar el total horizontal."""
+    if target_rows > len(data):
+        raise ValueError("No hay suficientes filas verticales para equilibrar")
+    groups = list(data.groupby("series", sort=False).indices.items())
+    if target_rows < len(groups):
+        raise ValueError("Se requiere al menos una fila por serie vertical")
+    allocation = {series: 0 for series, _ in groups}
+    while sum(allocation.values()) < target_rows:
+        for series, positions in groups:
+            if allocation[series] < len(positions):
+                allocation[series] += 1
+                if sum(allocation.values()) == target_rows:
+                    break
     selected = []
-    for _, positions in series.groupby(series, sort=False).groups.items():
-        positions = np.asarray(list(positions), dtype=int)
-        if len(positions) <= samples_per_series:
-            selected.extend(positions)
-            continue
-        offsets = np.rint(
-            np.linspace(0, len(positions) - 1, samples_per_series)
-        ).astype(int)
-        selected.extend(positions[offsets])
-    selected = np.asarray(selected, dtype=int)
-    return data.loc[selected].copy(), series.loc[selected].copy()
+    for series, positions in groups:
+        positions = np.asarray(positions)
+        densities = data.iloc[positions]["packing"].to_numpy(dtype=float)
+        targets = np.linspace(densities.min(), densities.max(), allocation[series])
+        used = np.zeros(len(positions), dtype=bool)
+        for target in targets:
+            order = np.argsort(np.abs(densities - target), kind="stable")
+            nearest = next(index for index in order if not used[index])
+            used[nearest] = True
+        selected.extend(positions[used])
+    return data.iloc[sorted(selected)].copy()
 
 
 def tensor_invariants(data: pd.DataFrame, prefix: str) -> tuple[pd.Series, pd.Series]:
@@ -65,16 +65,17 @@ def main() -> None:
     raw_dir = DATASET_DIR / "raw"
     processed_dir = DATASET_DIR / "processed"
     processed_dir.mkdir(parents=True, exist_ok=True)
-    for orientation in ("vertical", "horizontal"):
+    horizontal_count = len(pd.read_csv(raw_dir / "stable_packings_horizontal.csv"))
+    for orientation in ("horizontal", "vertical", "cyclic"):
         filename = f"stable_packings_{orientation}.csv"
         raw = pd.read_csv(raw_dir / filename)
-        series = series_numbers(raw)
+        if raw["series"].isna().any():
+            raise ValueError(f"{filename}: hay filas sin serie")
         if orientation == "vertical":
-            raw, series = representative_vertical_rows(raw, series)
+            raw = balanced_vertical_rows(raw, horizontal_count)
         data = preprocess(raw)
-        # Los CSV originales concatenan series; checkpoint se reinicia en cada una.
         data["orientation"] = orientation
-        data["series_id"] = orientation + "_" + series.astype(str)
+        data["series_id"] = orientation + "_" + raw["series"].astype(str)
         data.to_csv(processed_dir / filename, index=False)
         print(f"{filename}: {len(data)} filas, {len(data.columns)} columnas → {processed_dir}")
 

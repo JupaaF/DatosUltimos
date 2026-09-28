@@ -20,7 +20,7 @@ from .models import (
     RBF4, RBF5,
 )
 from .normalization import Normalizer, TARGET_COLUMN
-from .splitting import mixed_series_split
+from .splitting import full_grouped_split, mixed_series_split
 
 
 # Cada registro acopla modelo, contrato de datos y transformación del objetivo.
@@ -268,6 +268,7 @@ def main(argv=None):
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--split-seed", type=int, default=42, help="Semilla independiente para mantener la partición en las barridas")
+    parser.add_argument("--split-strategy", choices=["rows", "full-grouped"], default="rows")
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--log-every", type=int, default=25)
     parser.add_argument("--no-balance", action="store_true", help="Usar todas las filas de entrenamiento en cada época")
@@ -295,8 +296,13 @@ def main(argv=None):
     data = load_data(
         args.data_dir / "stable_packings_horizontal.csv",
         args.data_dir / "stable_packings_vertical.csv",
+        args.data_dir / "stable_packings_cyclic.csv" if args.split_strategy == "full-grouped" else None,
     )
-    split = mixed_series_split(data, seed=args.split_seed)
+    split = (
+        full_grouped_split(data, seed=args.split_seed)
+        if args.split_strategy == "full-grouped"
+        else mixed_series_split(data, seed=args.split_seed)
+    )
     output = args.output_dir or ROOT / "runs" / f"{args.model}_{datetime.now():%Y%m%d-%H%M%S-%f}"
     output.mkdir(parents=True, exist_ok=False)
     partitions = pd.concat([

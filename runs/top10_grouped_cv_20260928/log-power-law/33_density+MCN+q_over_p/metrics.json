@@ -1,0 +1,112 @@
+{
+  "selection_metric": "out_of_fold.K_rmse",
+  "out_of_fold": {
+    "n": 355,
+    "target_mse": 8.302536789090245e-05,
+    "K_rmse": 6.31109571381972e-05,
+    "K_mae": 4.043750582490713e-05,
+    "K_r2": 0.999800149950133
+  },
+  "fold_rmse_mean": 5.598631734746177e-05,
+  "fold_rmse_std": 2.2449815085937893e-05,
+  "folds": [
+    {
+      "fold": 0,
+      "validation_series": [
+        "horizontal_density_0.620",
+        "horizontal_density_0.635",
+        "vertical_pressure_125000_pa",
+        "vertical_pressure_50000_pa"
+      ],
+      "train_n": 267,
+      "validation_n": 88,
+      "best_epoch": 2398,
+      "epochs_run": 2698,
+      "metrics": {
+        "n": 88,
+        "target_mse": 8.431337025077255e-05,
+        "K_rmse": 6.123879278717393e-05,
+        "K_mae": 4.2157661882925885e-05,
+        "K_r2": 0.9997206188622376
+      }
+    },
+    {
+      "fold": 1,
+      "validation_series": [
+        "horizontal_density_0.605",
+        "horizontal_density_0.610",
+        "vertical_pressure_180000_pa",
+        "vertical_pressure_200000_pa"
+      ],
+      "train_n": 286,
+      "validation_n": 69,
+      "best_epoch": 2750,
+      "epochs_run": 3000,
+      "metrics": {
+        "n": 69,
+        "target_mse": 4.603433032364763e-05,
+        "K_rmse": 5.639425158862778e-05,
+        "K_mae": 3.97315786215716e-05,
+        "K_r2": 0.9998912540608617
+      }
+    },
+    {
+      "fold": 2,
+      "validation_series": [
+        "horizontal_density_0.630",
+        "horizontal_density_0.640",
+        "vertical_pressure_5000_pa",
+        "vertical_pressure_90000_pa"
+      ],
+      "train_n": 266,
+      "validation_n": 89,
+      "best_epoch": 2708,
+      "epochs_run": 3000,
+      "metrics": {
+        "n": 89,
+        "target_mse": 0.00014471828716932205,
+        "K_rmse": 9.03233421724733e-05,
+        "K_mae": 5.8860373127033376e-05,
+        "K_r2": 0.9995034469489497
+      }
+    },
+    {
+      "fold": 3,
+      "validation_series": [
+        "horizontal_density_0.600",
+        "horizontal_density_0.615",
+        "vertical_pressure_10000_pa"
+      ],
+      "train_n": 290,
+      "validation_n": 65,
+      "best_epoch": 2986,
+      "epochs_run": 3000,
+      "metrics": {
+        "n": 65,
+        "target_mse": 5.534712127515351e-05,
+        "K_rmse": 3.3831999989975633e-05,
+        "K_mae": 2.1959829457500786e-05,
+        "K_r2": 0.9999131874764872
+      }
+    },
+    {
+      "fold": 4,
+      "validation_series": [
+        "horizontal_density_0.625",
+        "vertical_pressure_30000_pa"
+      ],
+      "train_n": 311,
+      "validation_n": 44,
+      "best_epoch": 2458,
+      "epochs_run": 2758,
+      "metrics": {
+        "n": 44,
+        "target_mse": 5.455840422536491e-05,
+        "K_rmse": 3.8143200199058175e-05,
+        "K_mae": 2.813634714119532e-05,
+        "K_r2": 0.9998346690010618
+      }
+    }
+  ],
+  "test_evaluated": false
+}

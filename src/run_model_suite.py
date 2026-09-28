@@ -44,6 +44,8 @@ def main(argv=None):
     parser.add_argument("--epochs", type=int, default=10000)
     parser.add_argument("--patience", type=int, default=1000)
     parser.add_argument("--split-seed", type=int, default=42)
+    parser.add_argument("--data-dir", type=Path, default=Path("dataset/processed"))
+    parser.add_argument("--split-strategy", choices=["rows", "full-grouped"], default="full-grouped")
     args = parser.parse_args(argv)
     if args.output_dir.exists():
         parser.error(f"El directorio de salida ya existe: {args.output_dir}")
@@ -64,6 +66,9 @@ def main(argv=None):
                 "--model", model,
                 "--features", *features,
                 "--split-seed", str(args.split_seed),
+                "--split-strategy", args.split_strategy,
+                "--data-dir", str(args.data_dir),
+                "--no-balance",
                 "--epochs", str(args.epochs),
                 "--patience", str(args.patience),
                 "--output-dir", str(output),
@@ -103,9 +108,14 @@ def main(argv=None):
                 "epochs_run": metrics.get("epochs_run"),
             })
     summary = pd.DataFrame(rows).sort_values(
-        ["model", "validation_K_rmse"], na_position="last"
+        ["validation_K_rmse", "model"], na_position="last"
     )
     summary.to_csv(args.output_dir / "summary.csv", index=False)
+    winner = summary.loc[summary["validation_K_rmse"].first_valid_index()]
+    (args.output_dir / "winner.json").write_text(
+        json.dumps(winner.to_dict(), indent=2, allow_nan=False), encoding="utf-8"
+    )
+    print(f"Mejor configuración en validación: {winner['model']} {winner['combination']}")
     print(f"Suite completa: {args.output_dir}")
 
 

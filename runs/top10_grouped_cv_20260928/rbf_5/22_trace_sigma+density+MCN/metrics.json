@@ -1,0 +1,117 @@
+{
+  "selection_metric": "out_of_fold.K_rmse",
+  "out_of_fold": {
+    "n": 355,
+    "target_mse": 0.017358240260113154,
+    "K_rmse": 0.000583372316543407,
+    "K_mae": 0.00023260135303520646,
+    "K_r2": 0.9829239922116667
+  },
+  "fold_rmse_mean": 0.0004357302100626596,
+  "fold_rmse_std": 0.00040963468836049255,
+  "folds": [
+    {
+      "fold": 0,
+      "validation_series": [
+        "horizontal_density_0.620",
+        "horizontal_density_0.635",
+        "vertical_pressure_125000_pa",
+        "vertical_pressure_50000_pa"
+      ],
+      "train_n": 267,
+      "validation_n": 88,
+      "best_epoch": null,
+      "epochs_run": 0,
+      "metrics": {
+        "n": 88,
+        "target_mse": 0.006699087949656698,
+        "K_rmse": 0.0006698741198053231,
+        "K_mae": 0.00033230812459620327,
+        "K_r2": 0.9665704729754363,
+        "physical_metrics_finite": true
+      }
+    },
+    {
+      "fold": 1,
+      "validation_series": [
+        "horizontal_density_0.605",
+        "horizontal_density_0.610",
+        "vertical_pressure_180000_pa",
+        "vertical_pressure_200000_pa"
+      ],
+      "train_n": 286,
+      "validation_n": 69,
+      "best_epoch": null,
+      "epochs_run": 0,
+      "metrics": {
+        "n": 69,
+        "target_mse": 0.07542573410632754,
+        "K_rmse": 0.001043028459016106,
+        "K_mae": 0.00045494247135651606,
+        "K_r2": 0.96280062156028,
+        "physical_metrics_finite": true
+      }
+    },
+    {
+      "fold": 2,
+      "validation_series": [
+        "horizontal_density_0.630",
+        "horizontal_density_0.640",
+        "vertical_pressure_5000_pa",
+        "vertical_pressure_90000_pa"
+      ],
+      "train_n": 266,
+      "validation_n": 89,
+      "best_epoch": null,
+      "epochs_run": 0,
+      "metrics": {
+        "n": 89,
+        "target_mse": 0.0022212089753863053,
+        "K_rmse": 0.00023257808292989732,
+        "K_mae": 0.0001455450964401451,
+        "K_r2": 0.9967076711587346,
+        "physical_metrics_finite": true
+      }
+    },
+    {
+      "fold": 3,
+      "validation_series": [
+        "horizontal_density_0.600",
+        "horizontal_density_0.615",
+        "vertical_pressure_10000_pa"
+      ],
+      "train_n": 290,
+      "validation_n": 65,
+      "best_epoch": null,
+      "epochs_run": 0,
+      "metrics": {
+        "n": 65,
+        "target_mse": 0.0014430680265433247,
+        "K_rmse": 8.059971786234645e-05,
+        "K_mae": 6.268678396500235e-05,
+        "K_r2": 0.9995072869268327,
+        "physical_metrics_finite": true
+      }
+    },
+    {
+      "fold": 4,
+      "validation_series": [
+        "horizontal_density_0.625",
+        "vertical_pressure_30000_pa"
+      ],
+      "train_n": 311,
+      "validation_n": 44,
+      "best_epoch": null,
+      "epochs_run": 0,
+      "metrics": {
+        "n": 44,
+        "target_mse": 0.0017452927022518563,
+        "K_rmse": 0.0001525706706996251,
+        "K_mae": 0.0001116177340576073,
+        "K_r2": 0.9973547785662742,
+        "physical_metrics_finite": true
+      }
+    }
+  ],
+  "test_evaluated": false
+}

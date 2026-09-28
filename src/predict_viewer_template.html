@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Predicciones zigzag · Comparador de redes</title>
+  <style>
+    :root { color-scheme: light; --ink: #17211d; --muted: #59665d; --line: rgba(23,33,29,.16); --panel: rgba(255,255,255,.95); }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: #edf1ec; }
+    [hidden] { display: none !important; }
+    .app { position: relative; width: 100%; height: 100%; min-height: 100svh; }
+    canvas { display: block; width: 100%; height: 100%; background: linear-gradient(180deg,#f8faf7,#e9eee8); touch-action: none; cursor: crosshair; }
+    canvas.dragging { cursor: grabbing; }
+    .panel { position: absolute; z-index: 3; top: 16px; left: 16px; width: min(365px,calc(100vw - 32px)); max-height: calc(100svh - 32px); overflow: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: 0 18px 48px rgba(23,33,29,.14); backdrop-filter: blur(12px); }
+    .panel summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 15px 16px; cursor: pointer; font-size: 16px; font-weight: 750; }
+    .panel summary::marker { color: var(--muted); }
+    .count { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+    .panel-body { display: grid; gap: 12px; padding: 0 16px 16px; }
+    .intro, .hint { margin: 0; color: var(--muted); font-size: 11px; }
+    .control { display: grid; grid-template-columns: 80px minmax(0,1fr); align-items: center; gap: 8px; }
+    .control > label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    select, button, input { font: inherit; }
+    select, button { min-height: 34px; border: 1px solid var(--line); border-radius: 7px; background: white; color: var(--ink); }
+    select { width: 100%; padding: 5px 8px; }
+    button { padding: 5px 8px; cursor: pointer; font-size: 12px; font-weight: 700; }
+    button:hover { background: #f1f5f0; }
+    button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid #326bc8; outline-offset: 2px; }
+    .quick, .tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+    .tabs button { padding: 5px 3px; }
+    .tabs button[aria-selected="true"] { color: white; background: #17211d; border-color: #17211d; }
+    .reference[aria-disabled="true"], .control[aria-disabled="true"] { opacity: .5; }
+    .checkline { display: flex; gap: 8px; align-items: center; min-height: 30px; font-size: 12px; }
+    .checkline input { margin: 0; accent-color: #426b59; }
+    .reference { padding: 5px 7px; border: 1px solid var(--line); border-radius: 7px; }
+    .reference .swatch { background: #202824; }
+    .architecture { border-top: 1px solid var(--line); padding-top: 9px; }
+    .group-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+    .group-title strong { font-size: 12px; }
+    .group-title button { min-height: 25px; padding: 2px 7px; font-size: 11px; }
+    .model-list { display: grid; gap: 2px; }
+    .model-row { display: grid; grid-template-columns: 16px 14px minmax(0,1fr); gap: 7px; align-items: start; padding: 5px 4px; border-radius: 6px; cursor: pointer; font-size: 11px; }
+    .model-row:hover { background: #f1f5f0; }
+    .model-row input { margin: 2px 0 0; }
+    .swatch { display: inline-block; width: 14px; height: 3px; margin-top: 9px; border-radius: 2px; }
+    .model-row small { display: block; color: var(--muted); font-size: 10px; margin-top: 1px; }
+    .status { position: absolute; z-index: 1; right: 18px; bottom: 12px; color: #5e6c63; font-size: 12px; pointer-events: none; }
+    .tooltip { position: absolute; z-index: 4; display: none; width: min(330px,calc(100vw - 20px)); max-height: min(420px,70svh); overflow: auto; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.98); box-shadow: 0 12px 28px rgba(23,33,29,.2); pointer-events: none; font-size: 11px; font-variant-numeric: tabular-nums; }
+    .tooltip h3 { margin: 0 0 6px; font-size: 12px; }
+    .tooltip .value { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 2px 0; }
+    .tooltip .value b { white-space: nowrap; }
+    .tooltip .value span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 760px) {
+      .panel { top: 8px; left: 8px; width: calc(100vw - 16px); max-height: 44svh; }
+      .panel summary { padding: 10px 12px; }
+      .panel-body { padding: 0 12px 12px; gap: 9px; }
+      .status { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="Comparador de predicciones zigzag">
+    <canvas id="chart" aria-label="K real y predicciones de las redes seleccionadas"></canvas>
+    <details class="panel" id="panel" open>
+      <summary>Predicciones zigzag <span class="count" id="modelCount">82 puntos · 3 de 15 redes</span></summary>
+      <div class="panel-body">
+        <p class="intro">Compara las cinco mejores redes de cada arquitectura según la validación cruzada.</p>
+        <div class="tabs" role="tablist" aria-label="Magnitud representada">
+          <button type="button" role="tab" id="viewK" aria-selected="true">K</button>
+          <button type="button" role="tab" id="viewAbsolute" aria-selected="false">Error absoluto</button>
+          <button type="button" role="tab" id="viewRelative" aria-selected="false">Error relativo</button>
+        </div>
+        <p class="hint">Error absoluto = |K predicha − K real|; error relativo = 100 × error absoluto / K real.</p>
+        <div class="control"><label for="xAxis">Eje X</label><select id="xAxis"><option value="checkpoint">Checkpoint</option><option value="pressure">Presión (Pa)</option><option value="density">Densidad</option><option value="time">Tiempo</option></select></div>
+        <label class="checkline reference" id="referenceControl"><input type="checkbox" id="showTrue" checked><span class="swatch"></span><span>K real</span></label>
+        <div class="quick" role="group" aria-label="Selección rápida">
+          <button type="button" id="selectTop">Las mejores</button>
+          <button type="button" id="selectAll">Todas</button>
+          <button type="button" id="selectNone">Ninguna</button>
+        </div>
+        <div id="modelGroups"></div>
+        <div class="control" id="scaleControl"><label for="logY">Escala Y</label><label class="checkline"><input type="checkbox" id="logY">Logarítmica</label></div>
+        <button type="button" id="resetView">Restablecer vista</button>
+        <p class="hint">Rueda para ampliar ambos ejes, arrastra para desplazarlos y pasa el cursor para ver los valores. El error mostrado en la lista es el RMSE de zigzag.</p>
+      </div>
+    </details>
+    <div id="tooltip" class="tooltip" role="status"></div>
+    <div id="status" class="status">Datos y predicciones integrados · funciona sin conexión</div>
+  </main>
+  <script id="embedded-data" type="application/json">__EMBEDDED_DATA__</script>
+  <script>
+    (() => {
+      "use strict";
+      const payload = JSON.parse(document.getElementById("embedded-data").textContent);
+      const rows = payload.rows;
+      const models = payload.models;
+      const canvas = document.getElementById("chart");
+      const ctx = canvas.getContext("2d");
+      const panel = document.getElementById("panel");
+      const tooltip = document.getElementById("tooltip");
+      const xAxis = document.getElementById("xAxis");
+      const showTrue = document.getElementById("showTrue");
+      const logY = document.getElementById("logY");
+      const tabs = [
+        {id: "viewK", mode: "prediction"},
+        {id: "viewAbsolute", mode: "absolute"},
+        {id: "viewRelative", mode: "relative"}
+      ];
+      const count = document.getElementById("modelCount");
+      const selected = new Set(models.filter(model => model.rank === 1).map(model => model.id));
+      const groupButtons = new Map();
+      const state = {range: null, yRange: null, hover: null, drag: null, plot: null, mode: "prediction"};
+      const titles = {"log-power-law": "LogPowerLaw", "rbf_4": "RBF4", "rbf_5": "RBF5"};
+      const xLabels = {checkpoint: "Checkpoint", pressure: "Presión (Pa)", density: "Densidad", time: "Tiempo"};
+      const fmt = value => {
+        if (!Number.isFinite(value)) return "—";
+        const absolute = Math.abs(value);
+        if (absolute > 0 && absolute < 0.001) return value.toExponential(2);
+        if (absolute >= 1000) return new Intl.NumberFormat("es-ES", {maximumFractionDigits: 0}).format(value);
+        return new Intl.NumberFormat("es-ES", {maximumSignificantDigits: 5}).format(value);
+      };
+      const visibleModels = () => models.filter(model => selected.has(model.id));
+      const xValue = row => row[xAxis.value];
+      const plottedValue = (row, index) => {
+        const predicted = row.values[index];
+        if (state.mode === "absolute") return Math.abs(predicted - row.K_true);
+        if (state.mode === "relative") return 100 * Math.abs(predicted - row.K_true) / row.K_true;
+        return predicted;
+      };
+      function setMode(mode) {
+        state.mode = mode;
+        tabs.forEach(tab => {
+          const button = document.getElementById(tab.id);
+          button.setAttribute("aria-selected", String(tab.mode === mode));
+          button.tabIndex = tab.mode === mode ? 0 : -1;
+        });
+        const errorMode = mode !== "prediction";
+        canvas.setAttribute("aria-label", mode === "absolute" ? "Error absoluto de las redes seleccionadas" : mode === "relative" ? "Error relativo absoluto de las redes seleccionadas" : "K real y predicciones de las redes seleccionadas");
+        showTrue.disabled = errorMode;
+        logY.disabled = errorMode;
+        document.getElementById("referenceControl").setAttribute("aria-disabled", String(errorMode));
+        document.getElementById("scaleControl").setAttribute("aria-disabled", String(errorMode));
+        if (errorMode) logY.checked = false;
+        state.yRange = null;
+        state.hover = null;
+        tooltip.style.display = "none";
+        draw();
+      }
+      const baseRange = () => {
+        const values = rows.map(xValue);
+        const minimum = Math.min(...values), maximum = Math.max(...values);
+        const padding = (maximum - minimum || 1) * 0.025;
+        return [minimum - padding, maximum + padding];
+      };
+      function updateCount() {
+        count.textContent = `${rows.length} puntos · ${selected.size} de ${models.length} redes`;
+      }
+      function updateChecks() {
+        document.querySelectorAll("[data-model-id]").forEach(input => { input.checked = selected.has(input.dataset.modelId); });
+        for (const [architecture, button] of groupButtons) {
+          button.textContent = models.filter(model => model.architecture === architecture).every(model => selected.has(model.id)) ? "Quitar 5" : "Seleccionar 5";
+        }
+        updateCount();
+        state.yRange = null;
+        draw();
+      }
+      function makeGroups() {
+        const container = document.getElementById("modelGroups");
+        for (const architecture of ["log-power-law", "rbf_4", "rbf_5"]) {
+          const section = document.createElement("section");
+          section.className = "architecture";
+          const heading = document.createElement("div");
+          heading.className = "group-title";
+          const title = document.createElement("strong");
+          title.textContent = titles[architecture];
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = "Seleccionar 5";
+          groupButtons.set(architecture, button);
+          button.addEventListener("click", () => {
+            const group = models.filter(model => model.architecture === architecture);
+            const allOn = group.every(model => selected.has(model.id));
+            group.forEach(model => allOn ? selected.delete(model.id) : selected.add(model.id));
+            updateChecks();
+          });
+          heading.append(title, button);
+          section.append(heading);
+          const list = document.createElement("div");
+          list.className = "model-list";
+          for (const model of models.filter(item => item.architecture === architecture)) {
+            const label = document.createElement("label");
+            label.className = "model-row";
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.dataset.modelId = model.id;
+            input.checked = selected.has(model.id);
+            input.addEventListener("change", () => {
+              input.checked ? selected.add(model.id) : selected.delete(model.id);
+              updateChecks();
+            });
+            const swatch = document.createElement("span");
+            swatch.className = "swatch";
+            swatch.style.background = model.color;
+            const copy = document.createElement("span");
+            copy.textContent = `${model.rank}. ${model.features.join(" + ")}`;
+            const detail = document.createElement("small");
+            detail.textContent = `RMSE zigzag ${fmt(model.zigzag_rmse)} · CV ${fmt(model.cv_rmse)}`;
+            copy.append(detail);
+            label.append(input, swatch, copy);
+            list.append(label);
+          }
+          section.append(list);
+          container.append(section);
+        }
+      }
+      function dimensions() {
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        const mobile = width <= 760;
+        const rect = panel.getBoundingClientRect();
+        const left = mobile ? 66 : (panel.open ? Math.min(rect.right + 24, width * 0.48) : 70);
+        const top = mobile && panel.open ? Math.min(rect.bottom + 24, height * 0.58) : 65;
+        return {left, top, right: width - 35, bottom: height - 60, width, height};
+      }
+      function autoYDomain(active) {
+        const values = [];
+        if (state.mode === "prediction" && showTrue.checked) rows.forEach(row => values.push(row.K_true));
+        for (const model of active) {
+          const index = models.indexOf(model);
+          rows.forEach(row => values.push(plottedValue(row, index)));
+        }
+        if (state.mode !== "prediction") return [0, (Math.max(0, ...values) || 1) * 1.12];
+        if (!values.length) rows.forEach(row => values.push(row.K_true));
+        const min = Math.min(...values), max = Math.max(...values);
+        if (logY.checked) {
+          const lower = Math.log10(Math.max(min, 1e-12)), upper = Math.log10(max);
+          const pad = (upper - lower || 1) * 0.08;
+          return [lower - pad, upper + pad];
+        }
+        const pad = (max - min || 1) * 0.08;
+        return [min - pad, max + pad];
+      }
+      const yDomain = active => state.yRange || autoYDomain(active);
+      function draw() {
+        const dpr = window.devicePixelRatio || 1;
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+          canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+        const plot = dimensions();
+        state.plot = plot;
+        if (plot.right - plot.left < 80 || plot.bottom - plot.top < 80) return;
+        const xr = state.range || baseRange();
+        const active = visibleModels();
+        const yr = yDomain(active);
+        const sx = value => plot.left + (value - xr[0]) / (xr[1] - xr[0]) * (plot.right - plot.left);
+        const sy = value => {
+          const transformed = logY.checked ? Math.log10(Math.max(value, 1e-12)) : value;
+          return plot.bottom - (transformed - yr[0]) / (yr[1] - yr[0]) * (plot.bottom - plot.top);
+        };
+        ctx.font = "11px system-ui, sans-serif";
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(23,33,29,.12)";
+        ctx.fillStyle = "#59665d";
+        for (let i = 0; i <= 5; i++) {
+          const x = plot.left + i / 5 * (plot.right - plot.left);
+          const y = plot.top + i / 5 * (plot.bottom - plot.top);
+          ctx.beginPath(); ctx.moveTo(x, plot.top); ctx.lineTo(x, plot.bottom); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(plot.left, y); ctx.lineTo(plot.right, y); ctx.stroke();
+          ctx.textAlign = "center"; ctx.textBaseline = "top";
+          ctx.fillText(fmt(xr[0] + i / 5 * (xr[1] - xr[0])), x, plot.bottom + 9);
+          ctx.textAlign = "right"; ctx.textBaseline = "middle";
+          const transformed = yr[1] - i / 5 * (yr[1] - yr[0]);
+          ctx.fillText(fmt(logY.checked ? 10 ** transformed : transformed), plot.left - 9, y);
+        }
+        ctx.strokeStyle = "#66736a";
+        ctx.beginPath(); ctx.moveTo(plot.left, plot.top); ctx.lineTo(plot.left, plot.bottom); ctx.lineTo(plot.right, plot.bottom); ctx.stroke();
+        ctx.fillStyle = "#37433b";
+        ctx.font = "600 13px system-ui, sans-serif";
+        ctx.textAlign = "center"; ctx.fillText(xLabels[xAxis.value], (plot.left + plot.right) / 2, height - 23);
+        ctx.save(); ctx.translate(21, (plot.top + plot.bottom) / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(state.mode === "absolute" ? "|K predicha − K real|" : state.mode === "relative" ? "Error relativo absoluto (%)" : "K = tr(K)/3", 0, 0); ctx.restore();
+        const ordered = rows.map((_, index) => index).sort((a, b) => xValue(rows[a]) - xValue(rows[b]));
+        ctx.save(); ctx.beginPath(); ctx.rect(plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top); ctx.clip();
+        function line(valueAt, color, width) {
+          ctx.beginPath();
+          ordered.forEach((index, position) => {
+            const x = sx(xValue(rows[index])), y = sy(valueAt(rows[index]));
+            if (position === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          });
+          ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineJoin = "round"; ctx.stroke();
+        }
+        if (state.mode === "prediction" && showTrue.checked) line(row => row.K_true, "#202824", 1.8);
+        for (const model of active) {
+          const index = models.indexOf(model);
+          line(row => plottedValue(row, index), model.color, 1.3);
+        }
+        if (state.hover !== null) {
+          const x = sx(xValue(rows[state.hover]));
+          ctx.beginPath(); ctx.moveTo(x, plot.top); ctx.lineTo(x, plot.bottom);
+          ctx.strokeStyle = "rgba(23,33,29,.48)"; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+        }
+        ctx.restore();
+      }
+      function showTooltip(index, clientX, clientY) {
+        const row = rows[index];
+        tooltip.replaceChildren();
+        const heading = document.createElement("h3");
+        heading.textContent = `Checkpoint ${row.checkpoint} · ${xLabels[xAxis.value]} ${fmt(xValue(row))}`;
+        tooltip.append(heading);
+        const add = (label, value, color) => {
+          const line = document.createElement("div"); line.className = "value";
+          const name = document.createElement("span"); name.textContent = label;
+          if (color) name.style.color = color;
+          const number = document.createElement("b"); number.textContent = fmt(value) + (state.mode === "relative" && label !== "K real" ? " %" : "");
+          line.append(name, number); tooltip.append(line);
+        };
+        add("K real", row.K_true, "#202824");
+        for (const model of visibleModels()) {
+          const value = plottedValue(row, models.indexOf(model));
+          add(`${titles[model.architecture]} ${model.rank}`, value, model.color);
+        }
+        const app = document.querySelector(".app").getBoundingClientRect();
+        tooltip.style.display = "block";
+        const rect = tooltip.getBoundingClientRect();
+        const x = Math.max(8, Math.min(clientX - app.left + 15, app.width - rect.width - 8));
+        const y = Math.max(8, Math.min(clientY - app.top + 15, app.height - rect.height - 8));
+        tooltip.style.left = `${x}px`; tooltip.style.top = `${y}px`;
+      }
+      function clampRange(start, end, base) {
+        const full = base[1] - base[0], span = end - start;
+        if (span >= full) return base;
+        if (start < base[0]) { end += base[0] - start; start = base[0]; }
+        if (end > base[1]) { start -= end - base[1]; end = base[1]; }
+        return [start, end];
+      }
+      function pointerX(event) { return event.clientX - canvas.getBoundingClientRect().left; }
+      canvas.addEventListener("pointerdown", event => {
+        const plot = state.plot, x = pointerX(event);
+        if (!plot || x < plot.left || x > plot.right || event.clientY < plot.top || event.clientY > plot.bottom) return;
+        state.drag = {
+          x, y: event.clientY,
+          xRange: [...(state.range || baseRange())],
+          yRange: [...yDomain(visibleModels())]
+        };
+        canvas.setPointerCapture(event.pointerId);
+        canvas.classList.add("dragging");
+        tooltip.style.display = "none";
+      });
+      canvas.addEventListener("pointermove", event => {
+        const plot = state.plot, x = pointerX(event);
+        if (!plot) return;
+        if (state.drag) {
+          const xSpan = state.drag.xRange[1] - state.drag.xRange[0];
+          const ySpan = state.drag.yRange[1] - state.drag.yRange[0];
+          const xShift = (state.drag.x - x) / (plot.right - plot.left) * xSpan;
+          const yShift = (event.clientY - state.drag.y) / (plot.bottom - plot.top) * ySpan;
+          state.range = clampRange(
+            state.drag.xRange[0] + xShift, state.drag.xRange[1] + xShift, baseRange()
+          );
+          state.yRange = clampRange(
+            state.drag.yRange[0] + yShift, state.drag.yRange[1] + yShift,
+            autoYDomain(visibleModels())
+          );
+          state.hover = null; draw(); return;
+        }
+        if (x < plot.left || x > plot.right || event.clientY < plot.top || event.clientY > plot.bottom) {
+          state.hover = null; tooltip.style.display = "none"; draw(); return;
+        }
+        const range = state.range || baseRange();
+        const target = range[0] + (x - plot.left) / (plot.right - plot.left) * (range[1] - range[0]);
+        let nearest = 0;
+        for (let i = 1; i < rows.length; i++) if (Math.abs(xValue(rows[i]) - target) < Math.abs(xValue(rows[nearest]) - target)) nearest = i;
+        state.hover = nearest; draw(); showTooltip(nearest, event.clientX, event.clientY);
+      });
+      canvas.addEventListener("pointerup", event => { state.drag = null; canvas.classList.remove("dragging"); if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId); });
+      canvas.addEventListener("pointercancel", () => { state.drag = null; canvas.classList.remove("dragging"); });
+      canvas.addEventListener("pointerleave", () => { if (!state.drag) { state.hover = null; tooltip.style.display = "none"; draw(); } });
+      canvas.addEventListener("wheel", event => {
+        const plot = state.plot, x = pointerX(event);
+        if (!plot || x < plot.left || x > plot.right || event.clientY < plot.top || event.clientY > plot.bottom) return;
+        event.preventDefault();
+        const xBase = baseRange(), yBase = autoYDomain(visibleModels());
+        const currentX = state.range || xBase, currentY = state.yRange || yBase;
+        const xSpan = currentX[1] - currentX[0], ySpan = currentY[1] - currentY[0];
+        const factor = Math.exp(event.deltaY * 0.001);
+        const nextXSpan = Math.max((xBase[1] - xBase[0]) / 80, Math.min(xBase[1] - xBase[0], xSpan * factor));
+        const nextYSpan = Math.max((yBase[1] - yBase[0]) / 80, Math.min(yBase[1] - yBase[0], ySpan * factor));
+        const xFraction = (x - plot.left) / (plot.right - plot.left);
+        const yFraction = (event.clientY - plot.top) / (plot.bottom - plot.top);
+        const centerX = currentX[0] + xFraction * xSpan;
+        const centerY = currentY[1] - yFraction * ySpan;
+        state.range = clampRange(
+          centerX - xFraction * nextXSpan, centerX + (1 - xFraction) * nextXSpan, xBase
+        );
+        state.yRange = clampRange(
+          centerY - (1 - yFraction) * nextYSpan, centerY + yFraction * nextYSpan, yBase
+        );
+        draw();
+      }, {passive: false});
+      document.getElementById("selectTop").addEventListener("click", () => { selected.clear(); models.filter(model => model.rank === 1).forEach(model => selected.add(model.id)); updateChecks(); });
+      document.getElementById("selectAll").addEventListener("click", () => { models.forEach(model => selected.add(model.id)); updateChecks(); });
+      document.getElementById("selectNone").addEventListener("click", () => { selected.clear(); updateChecks(); });
+      document.getElementById("resetView").addEventListener("click", () => { state.range = null; state.yRange = null; state.hover = null; tooltip.style.display = "none"; draw(); });
+      xAxis.addEventListener("change", () => { state.range = null; state.yRange = null; state.hover = null; tooltip.style.display = "none"; draw(); });
+      showTrue.addEventListener("change", () => { state.yRange = null; draw(); });
+      logY.addEventListener("change", () => { state.yRange = null; draw(); });
+      tabs.forEach((tab, index) => {
+        const button = document.getElementById(tab.id);
+        button.addEventListener("click", () => setMode(tab.mode));
+        button.addEventListener("keydown", event => {
+          if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+          event.preventDefault();
+          const direction = event.key === "ArrowRight" ? 1 : -1;
+          const next = tabs[(index + direction + tabs.length) % tabs.length];
+          document.getElementById(next.id).focus();
+          setMode(next.mode);
+        });
+      });
+      panel.addEventListener("toggle", () => requestAnimationFrame(draw));
+      window.addEventListener("resize", draw);
+      makeGroups(); updateCount(); setMode("prediction");
+    })();
+  </script>
+</body>
+</html>

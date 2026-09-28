@@ -1,0 +1,14 @@
+{
+  "source_run": "/home/jpfernandez/Documentos/DatosUltimos/runs/density_balanced_grouped_20260928",
+  "model": "log-power-law",
+  "combination": "17_MCN+q_over_p",
+  "features": [
+    "MCN",
+    "q_over_p"
+  ],
+  "folds": 5,
+  "seed": 42,
+  "epochs": 3000,
+  "patience": 300,
+  "held_out_test_rows": 254
+}

@@ -1,0 +1,26 @@
+{
+  "model": "rbf_4",
+  "features": [
+    "trace_sigma",
+    "density",
+    "q",
+    "a"
+  ],
+  "log_columns": null,
+  "data_dir": "/home/jpfernandez/Documentos/DatosUltimos/dataset/processed",
+  "output_dir": "/home/jpfernandez/Documentos/DatosUltimos/runs/density_balanced_grouped_20260928/rbf_4/46_trace_sigma+density+q+a",
+  "epochs": 3000,
+  "batch_size": 16,
+  "learning_rate": 0.001,
+  "patience": 300,
+  "min_delta": 0.0,
+  "dropout": 0.1,
+  "seed": 42,
+  "split_seed": 42,
+  "split_strategy": "full-grouped",
+  "device": "cpu",
+  "log_every": 25,
+  "no_balance": true,
+  "scale_target": false,
+  "physical_loss_weight": 0.0
+}
