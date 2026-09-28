@@ -1,8 +1,37 @@
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 DATASET_DIR = Path(__file__).resolve().parents[1] / "dataset"
+VERTICAL_SAMPLES_PER_SERIES = 15
+
+
+def series_numbers(data: pd.DataFrame) -> pd.Series:
+    """Numera las series según los reinicios de checkpoint."""
+    return data["checkpoint"].diff().le(0).cumsum() + 1
+
+
+def representative_vertical_rows(
+    data: pd.DataFrame,
+    series: pd.Series,
+    samples_per_series: int = VERTICAL_SAMPLES_PER_SERIES,
+) -> tuple[pd.DataFrame, pd.Series]:
+    """Selecciona posiciones equiespaciadas, incluidos ambos extremos."""
+    selected = []
+    for series_number, positions in series.groupby(series, sort=False).groups.items():
+        positions = np.asarray(list(positions), dtype=int)
+        if len(positions) < samples_per_series:
+            raise ValueError(
+                f"La serie vertical {series_number} solo tiene {len(positions)} filas; "
+                f"se requieren {samples_per_series}"
+            )
+        offsets = np.rint(
+            np.linspace(0, len(positions) - 1, samples_per_series)
+        ).astype(int)
+        selected.extend(positions[offsets])
+    selected = np.asarray(selected, dtype=int)
+    return data.loc[selected].copy(), series.loc[selected].copy()
 
 
 def tensor_invariants(data: pd.DataFrame, prefix: str) -> tuple[pd.Series, pd.Series]:
@@ -41,9 +70,11 @@ def main() -> None:
     for orientation in ("vertical", "horizontal"):
         filename = f"stable_packings_{orientation}.csv"
         raw = pd.read_csv(raw_dir / filename)
+        series = series_numbers(raw)
+        if orientation == "vertical":
+            raw, series = representative_vertical_rows(raw, series)
         data = preprocess(raw)
         # Los CSV originales concatenan series; checkpoint se reinicia en cada una.
-        series = raw["checkpoint"].diff().le(0).cumsum() + 1
         data["orientation"] = orientation
         data["series_id"] = orientation + "_" + series.astype(str)
         data.to_csv(processed_dir / filename, index=False)
