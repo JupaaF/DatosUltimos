@@ -17,15 +17,13 @@ def representative_vertical_rows(
     series: pd.Series,
     samples_per_series: int = VERTICAL_SAMPLES_PER_SERIES,
 ) -> tuple[pd.DataFrame, pd.Series]:
-    """Selecciona posiciones equiespaciadas, incluidos ambos extremos."""
+    """Selecciona posiciones equiespaciadas o todas si la serie es corta."""
     selected = []
-    for series_number, positions in series.groupby(series, sort=False).groups.items():
+    for _, positions in series.groupby(series, sort=False).groups.items():
         positions = np.asarray(list(positions), dtype=int)
-        if len(positions) < samples_per_series:
-            raise ValueError(
-                f"La serie vertical {series_number} solo tiene {len(positions)} filas; "
-                f"se requieren {samples_per_series}"
-            )
+        if len(positions) <= samples_per_series:
+            selected.extend(positions)
+            continue
         offsets = np.rint(
             np.linspace(0, len(positions) - 1, samples_per_series)
         ).astype(int)
