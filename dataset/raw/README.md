@@ -4,7 +4,7 @@ Los tres CSV tienen las mismas 37 columnas: las mediciones originales compartida
 
 | Archivo | Series | Filas |
 | --- | --- | ---: |
-| `stable_packings_horizontal.csv` | `density_0.595` a `density_0.640`, en pasos de 0.005 | 200 |
+| `stable_packings_horizontal.csv` | `density_0.590` a `density_0.640`, en pasos de 0.005 | 220 |
 | `stable_packings_vertical.csv` | `pressure_5000_pa`, `pressure_10000_pa`, `pressure_20000_pa`, `pressure_30000_pa`, `pressure_50000_pa`, `pressure_90000_pa`, `pressure_125000_pa`, `pressure_180000_pa`, `pressure_200000_pa` | 596 |
 | `stable_packings_cyclic.csv` | `cyclic_1`, `cyclic_2` | 209 |
 
