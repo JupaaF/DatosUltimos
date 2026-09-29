@@ -28,6 +28,7 @@
     button:hover { background: #f1f5f0; }
     button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid #326bc8; outline-offset: 2px; }
     .quick, .tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+    .dataset-tabs { grid-template-columns: repeat(2,1fr); }
     .tabs button { padding: 5px 3px; }
     .tabs button[aria-selected="true"] { color: white; background: #17211d; border-color: #17211d; }
     .reference[aria-disabled="true"], .control[aria-disabled="true"] { opacity: .5; }
@@ -66,6 +67,10 @@
       <summary>Predicciones zigzag <span class="count" id="modelCount">82 puntos · 3 de 15 redes</span></summary>
       <div class="panel-body">
         <p class="intro">Compara las cinco mejores redes de cada arquitectura según la validación cruzada.</p>
+        <div class="tabs dataset-tabs" role="tablist" aria-label="Dataset de test">
+          <button type="button" role="tab" id="datasetZigzag" aria-selected="true">Zigzag</button>
+          <button type="button" role="tab" id="datasetZigzag2" aria-selected="false">Zigzag 2 (incompleto)</button>
+        </div>
         <div class="tabs" role="tablist" aria-label="Magnitud representada">
           <button type="button" role="tab" id="viewK" aria-selected="true">K</button>
           <button type="button" role="tab" id="viewAbsolute" aria-selected="false">Error absoluto</button>
@@ -82,7 +87,7 @@
         <div id="modelGroups"></div>
         <div class="control" id="scaleControl"><label for="logY">Escala Y</label><label class="checkline"><input type="checkbox" id="logY">Logarítmica</label></div>
         <button type="button" id="resetView">Restablecer vista</button>
-        <p class="hint">Rueda para ampliar ambos ejes, arrastra para desplazarlos y pasa el cursor para ver los valores. El error mostrado en la lista es el RMSE de zigzag.</p>
+        <p class="hint">Rueda para ampliar ambos ejes, arrastra para desplazarlos y pasa el cursor para ver los valores. El error mostrado en la lista es el RMSE del dataset seleccionado.</p>
       </div>
     </details>
     <div id="tooltip" class="tooltip" role="status"></div>
@@ -93,7 +98,9 @@
     (() => {
       "use strict";
       const payload = JSON.parse(document.getElementById("embedded-data").textContent);
-      const rows = payload.rows;
+      const datasets = payload.datasets;
+      let dataset = datasets[0];
+      let rows = dataset.rows;
       const models = payload.models;
       const canvas = document.getElementById("chart");
       const ctx = canvas.getContext("2d");
@@ -107,7 +114,12 @@
         {id: "viewAbsolute", mode: "absolute"},
         {id: "viewRelative", mode: "relative"}
       ];
+      const datasetTabs = [
+        {id: "datasetZigzag", dataset: datasets[0]},
+        {id: "datasetZigzag2", dataset: datasets[1]}
+      ];
       const count = document.getElementById("modelCount");
+      const modelDetails = new Map();
       const selected = new Set(models.filter(model => model.rank === 1).map(model => model.id));
       const groupButtons = new Map();
       const state = {range: null, yRange: null, hover: null, drag: null, plot: null, mode: "prediction"};
@@ -155,6 +167,26 @@
       };
       function updateCount() {
         count.textContent = `${rows.length} puntos · ${selected.size} de ${models.length} redes`;
+      }
+      function setDataset(next) {
+        dataset = next;
+        rows = dataset.rows;
+        datasetTabs.forEach(tab => {
+          const button = document.getElementById(tab.id);
+          const active = tab.dataset.id === dataset.id;
+          button.setAttribute("aria-selected", String(active));
+          button.tabIndex = active ? 0 : -1;
+        });
+        state.range = null;
+        state.yRange = null;
+        state.hover = null;
+        state.drag = null;
+        tooltip.style.display = "none";
+        for (const model of models) {
+          modelDetails.get(model.id).textContent = `RMSE ${dataset.label} ${fmt(model.rmse[dataset.id])} · CV ${fmt(model.cv_rmse)}`;
+        }
+        updateCount();
+        draw();
       }
       function updateChecks() {
         document.querySelectorAll("[data-model-id]").forEach(input => { input.checked = selected.has(input.dataset.modelId); });
@@ -205,7 +237,7 @@
             const copy = document.createElement("span");
             copy.textContent = `${model.rank}. ${model.features.join(" + ")}`;
             const detail = document.createElement("small");
-            detail.textContent = `RMSE zigzag ${fmt(model.zigzag_rmse)} · CV ${fmt(model.cv_rmse)}`;
+            modelDetails.set(model.id, detail);
             copy.append(detail);
             label.append(input, swatch, copy);
             list.append(label);
@@ -406,6 +438,18 @@
       xAxis.addEventListener("change", () => { state.range = null; state.yRange = null; state.hover = null; tooltip.style.display = "none"; draw(); });
       showTrue.addEventListener("change", () => { state.yRange = null; draw(); });
       logY.addEventListener("change", () => { state.yRange = null; draw(); });
+      datasetTabs.forEach((tab, index) => {
+        const button = document.getElementById(tab.id);
+        button.addEventListener("click", () => setDataset(tab.dataset));
+        button.addEventListener("keydown", event => {
+          if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+          event.preventDefault();
+          const direction = event.key === "ArrowRight" ? 1 : -1;
+          const next = datasetTabs[(index + direction + datasetTabs.length) % datasetTabs.length];
+          document.getElementById(next.id).focus();
+          setDataset(next.dataset);
+        });
+      });
       tabs.forEach((tab, index) => {
         const button = document.getElementById(tab.id);
         button.addEventListener("click", () => setMode(tab.mode));
@@ -420,7 +464,7 @@
       });
       panel.addEventListener("toggle", () => requestAnimationFrame(draw));
       window.addEventListener("resize", draw);
-      makeGroups(); updateCount(); setMode("prediction");
+      makeGroups(); setDataset(dataset); setMode("prediction");
     })();
   </script>
 </body>

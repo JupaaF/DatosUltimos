@@ -1,4 +1,7 @@
-"""Construye el visor HTML autocontenido de las predicciones zigzag."""
+"""Construye el visor HTML autocontenido de las predicciones zigzag.
+
+Ejecutar: python -m src.build_predict_viewer
+"""
 
 import json
 from pathlib import Path
@@ -6,9 +9,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.predict import predict_test
+from src.preprocessing import preprocess
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "runs" / "zigzag_predictions_cv_top5_20260928"
+MODEL_SOURCE = ROOT / "runs" / "density_balanced_grouped_20260928"
+SECOND_DATASET = ROOT / "stable_packings_zigzag_2_incompleto.csv"
 TEMPLATE = Path(__file__).with_name("predict_viewer_template.html")
 OUTPUT = ROOT / "results_zigzag_predict_viewer.html"
 ARCHITECTURES = ("log-power-law", "rbf_4", "rbf_5")
@@ -44,16 +52,16 @@ def main() -> None:
                 "combination": item.combination,
                 "features": item.features.split(","),
                 "cv_rmse": float(item.cv_oof_K_rmse),
-                "zigzag_rmse": float(item.zigzag_K_rmse),
+                "rmse": {"zigzag": float(item.zigzag_K_rmse)},
                 "color": COLORS[architecture][item.rank_cv - 1],
             })
-    rows = []
+    first_rows = []
     for position, item in reference.iterrows():
         values = [float(frames[model["architecture"]].iloc[position][f"K_pred_{model['rank']}"])
                   for model in models]
         if not np.isfinite(values).all():
             raise ValueError(f"Predicción no finita en fila {position}")
-        rows.append({
+        first_rows.append({
             "row_id": int(item.row_id),
             "checkpoint": int(item.checkpoint),
             "time": float(item.time),
@@ -62,13 +70,48 @@ def main() -> None:
             "K_true": float(item.K_true),
             "values": values,
         })
-    payload = json.dumps({"models": models, "rows": rows}, ensure_ascii=False, separators=(",", ":"))
+    raw = pd.read_csv(SECOND_DATASET)
+    if raw.empty or raw["checkpoint"].isna().any():
+        raise ValueError("El segundo dataset debe contener checkpoints")
+    processed = preprocess(raw)
+    processed["row_id"] = np.arange(len(raw))
+    processed["orientation"] = "zigzag"
+    processed["series_id"] = "zigzag_2"
+    if not np.isfinite(processed.select_dtypes(include="number").to_numpy()).all():
+        raise ValueError("El segundo dataset contiene valores no finitos")
+    predictions = []
+    for model in models:
+        path = MODEL_SOURCE / model["architecture"] / model["combination"]
+        prediction = predict_test(path, test_data=processed)
+        if not prediction["row_id"].equals(processed["row_id"]):
+            raise ValueError(f"Las filas predichas no coinciden para {model['id']}")
+        values = prediction["K_predicted"].to_numpy(dtype=float)
+        if not np.isfinite(values).all():
+            raise ValueError(f"Predicción no finita para {model['id']}")
+        model["rmse"]["zigzag_2"] = float(np.sqrt(np.mean((values - processed["trace_K"].to_numpy()) ** 2)))
+        predictions.append(values)
+    second_rows = []
+    for position, item in raw.iterrows():
+        second_rows.append({
+            "row_id": position,
+            "checkpoint": int(item.checkpoint),
+            "time": float(item.time),
+            "pressure": float(processed.iloc[position].trace_sigma),
+            "density": float(processed.iloc[position].density),
+            "K_true": float(processed.iloc[position].trace_K),
+            "values": [float(values[position]) for values in predictions],
+        })
+    datasets = [
+        {"id": "zigzag", "label": "Zigzag", "rows": first_rows},
+        {"id": "zigzag_2", "label": "Zigzag 2 (incompleto)", "rows": second_rows},
+    ]
+    payload = json.dumps({"models": models, "datasets": datasets}, ensure_ascii=False, separators=(",", ":"))
     payload = payload.replace("<", "\\u003c")
     template = TEMPLATE.read_text(encoding="utf-8")
     if template.count("__EMBEDDED_DATA__") != 1:
         raise ValueError("El template requiere exactamente un marcador de datos")
     OUTPUT.write_text(template.replace("__EMBEDDED_DATA__", payload), encoding="utf-8")
-    print(f"{OUTPUT}: {len(rows)} puntos, {len(models)} redes")
+    print(f"{OUTPUT}: {len(first_rows)} + {len(second_rows)} puntos, {len(models)} redes")
 
 
 if __name__ == "__main__":
